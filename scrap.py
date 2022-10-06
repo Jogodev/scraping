@@ -13,57 +13,51 @@ table_book = []
 
 # url = "http://books.toscrape.com/catalogue/category/books/christian-fiction_34/index.html"
 # url = "http://books.toscrape.com/catalogue/category/books/fantasy_19/index.html"
+# url = "http://books.toscrape.com/catalogue/category/books/travel_2/index.html"
 url = "http://books.toscrape.com/index.html"
-response = requests.get(url)
+response = requests.get()
 soup = BeautifulSoup(response.content, 'html.parser')
 
 
-def click(url):
-    return requests.get(url)
+def click(urls):
+    return requests.get(urls)
 
 
-def paginate():
-    next_button = soup.find('li', class_='next').find('a', href=True)
-    if next_button:
-        url_change = url.replace('index.html', str(next_button['href']))
-        next_page = requests.get(url_change)
-        print(next_page)
-    else:
-        print("Non")
+# def paginate(page_soup):
+#     next_button = page_soup.find('li', class_='next').find('a', href=True)
+#     if next_button:
+#         url_change = url.replace('index.html', str(next_button['href']))
+#         next_page = click(url_change)
+#         return next_page
+#     else:
+#         print("Non")
+# paginate()
 
-        
-def scrap():
-    categories = soup.find('div', class_='side_categories').find('ul').find('ul').findAll('a', href=True)
-    books = soup.find('ol', class_='row').findAll('a')
-    for category in categories:
-        link_category = (('http://books.toscrape.com/') + (category['href']))
-        click(link_category)
-        for book in books:
-            link_books = (('http://books.toscrape.com/') + (book['href']))
-            click(link_books)
-            print(click(link_books))
-            for data in link_books:
-                rating = soup.find('p', class_='star-rating Three').findAll('i')
-                product_description = soup.find('meta', {'name': 'description'})
-                categ = soup.find('li', class_='active')
-                title_book = soup.find('h3')
-            # with open("books.csv", "w") as bookfile:
-            #     bookfile.write(
-            #         "product_page_url ; category ; title ; product_description ; universal_ product_code (upc) ; price_including_tax ; "
-            #         "price_excluding_tax ; number_available  ; review_rating ; image_url \n")
-            #     bookfile.write(str(link_books) + ' ; ' + str(categ) + ' ; ' + str(title_book) + ' ; ' + str(
-            #         product_description) + ' ; ' + str(table_book) + ' ; ' + str(len(rating)))
+def get_all_books(urls):
+    link_books = soup.find('ol', class_='row').findAll('a', href=True)
+    for books in link_books:
+        link_book = (('http://books.toscrape.com/') + (books['href']))
+        book_pages = click(link_book)
+        book_soup = BeautifulSoup(book_pages.content, 'html.parser')
+        rating = book_soup.find('p', class_='star-rating').findAll('i')
+        categ = book_soup.find('li', class_='active').findPrevious('a').text
+        title_book = book_soup.find('li', class_='active').text
+        product_description = book_soup.find('div', {'id': 'product_description'}).findNext('p').text
+        table_book = book_soup.find('table', class_='table table-striped').text
+        with open("books.csv", "w") as bookfile:
+            bookfile.write(
+                "product_page_url ; category ; title ; product_description ; universal_ product_code (upc) ; price_including_tax ; "
+                "price_excluding_tax ; number_available  ; review_rating ; image_url \n")
+            bookfile.write(str(link_book) + ' ; ' + str(categ) + ' ; ' + str(title_book) + ' ; ' + str(
+                product_description) + ' ; ' + str(table_book) + ' ; ' + str(len(rating)))
 
+get_all_books("http://books.toscrape.com/catalogue/category/books/christian-fiction_34/index.html")
+# def scrap():
+#     categories = soup.find('div', class_='side_categories').find('ul').find('ul').findAll('a', href=True)
+#     for category in categories:
+#         category_soup = BeautifulSoup(response.content, 'html.parser')
+#         url_change_category = category['href'].replace("..", "")
+#         link_category = (('http://books.toscrape.com/') + (url_change_category))
+#         category_result = click(link_category)
+#         for category_result in category:
 
-scrap()
-# #url pour une catégorie
-# url = "http://books.toscrape.com/catalogue/category/books/mystery_3/index.html"
-#
-# category = soup.findAll('article', class_='product_pod')
-# print(category)
-# #[print(str(a) + '\n') for a in categs]
-# #for li in categs:
-# soup = BeautifulSoup(html)
-#
-# for a in soup.find_all('a', href=True):
-#     print("Found the URL:", a['href'])
