@@ -16,19 +16,19 @@ url = "http://books.toscrape.com/index.html"
 def click(urls):
     return requests.get(urls)
 
-
 def paginate(url):
-    while True:
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         footer = soup.select_one('li.current')
+        try:
+            print(footer.text.strip())
+        except AttributeError as error:
+            print('aucune autre page')
         next_page = soup.select_one('li.next>a')
         if next_page:
             next_url = next_page.get('href')
-            url = urljoin(url, next_url)
-            get_all_books(url)
-        else:
-            break
+            url_next = urljoin(url, next_url)
+            get_all_books(url_next)
 
 
 def get_all_books(url):
@@ -40,11 +40,13 @@ def get_all_books(url):
         book_url_change = books['href'].replace('../../../', '')
         link_book = (('http://books.toscrape.com/catalogue/') + (book_url_change))
         book_pages = click(link_book)
-        print(link_book)
         book_soup = BeautifulSoup(book_pages.content, 'html.parser')
         categ = book_soup.find('li', class_='active').findPrevious('a').text
         title_book = book_soup.find('li', class_='active').text
-        product_description = book_soup.find('div', {'id': 'product_description'}).findNext('p').text
+        try:
+            product_description = book_soup.find('div', {'id': 'product_description'}).findNext('p')
+        except AttributeError as error:
+            product_description = "Ce livre n'a pas de description"
         table_book_upc = book_soup.find('table', class_='table table-striped').findNext('td').text
         table_book_tax_excl = book_soup.find('table', class_='table table-striped').findNext('td').findNext(
             'td').findNext('td').text
@@ -54,30 +56,20 @@ def get_all_books(url):
             'td').findNext('td').findNext('td').findNext('td').text
         rating = (book_soup.find('p', class_='star-rating').findAll('i'))
         review = book_soup.find('table', class_='table table-striped').findNext('td').findNext('td').findNext(
-            'td').findNext('td').findNext('td').findNext('td').findNext('td').text
-        with open("books.csv", "a") as csv_book:
+                'td').findNext('td').findNext('td').findNext('td').findNext('td').text
+        with open(f"{categ}_books.csv", "a", encoding="utf-8") as csv_book:
             header = ['product_page_url', 'category', 'title', 'product_description', 'upc', 'price_including_tax',
-                      'price_excluding_tax', 'number_available', 'rating', 'review']
+                    'price_excluding_tax', 'number_available', 'rating', 'review']
             writer = csv.writer(csv_book)
             writer.writerow(header)
             for product_page_url, category, title, product_description, upc, price_including_tax, price_excluding_tax, number_available, rating, review in zip(
-                    str(link_books), str(categ), str(title_book), str(product_description), str(table_book_upc),
+                    link_book, str(categ), str(title_book), product_description, str(table_book_upc),
                     str(table_book_tax_excl), str(table_book_tax_incl), str(table_book_stock), str(len(rating)),
                     review):
                 writer.writerow(
-                    [link_books, categ, title_book, product_description, table_book_upc, table_book_tax_excl,
-                     table_book_tax_incl, table_book_stock, rating, review])
+                    [link_book, categ, title_book, product_description, table_book_upc, table_book_tax_excl,
+                    table_book_tax_incl, table_book_stock, rating, review])
     paginate(url)
-
-
-
-# with open("books.csv", "w") as bookfile:
-#     bookfile.write(
-#         "product_page_url ; category ; title ; product_description ; universal_ product_code (upc) ; price_including_tax ; "
-#         "price_excluding_tax ; number_available  ; rating ; review \n")
-#     bookfile.write(str(link_book) + ' ; ' + str(categ) + ' ; ' + str(title_book) + ' ; ' + str(
-#         product_description) + ' ; ' + str(table_book_upc) + ' ; ' + str(table_book_tax_excl) + ' ; ' + str(
-#         table_book_tax_incl) + ' ; ' + str(table_book_stock) + ' ; ' + str(len(rating)) + ' ; ' + str(review))
 
 
 def get_all_categories(url):
@@ -87,9 +79,9 @@ def get_all_categories(url):
     for category in categories:
         url_change_category = category['href'].replace("..", "")
         link_category = (("http://books.toscrape.com/") + (url_change_category))
-        category_result = click(link_category)
-        # category_soup = BeautifulSoup(category_result.content, 'html.parser')
-        print(get_all_books(link_category))
-get_all_categories("http://books.toscrape.com/index.html")
+        print(link_category)
+        with open(f'{category.text.strip()}_books.csv', "w", encoding='utf-8') as csv_book:
+            writer = csv.writer(csv_book)
+            get_all_books(link_category)
 
-
+get_all_categories(url)
