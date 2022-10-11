@@ -92,6 +92,4 @@ def get_all_categories(url):
 
 get_all_categories(url)
 
-
-
 # array[2]
