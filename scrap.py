@@ -4,6 +4,7 @@ import urllib.request
 from PIL import Image
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import os
 
 product_page_url = []
 title = []
@@ -25,7 +26,7 @@ def paginate(url):
         try:
             print(footer.text.strip())
         except AttributeError as error:
-            print('')
+            print('1 seul page')
         next_page = soup.select_one('li.next>a')
         if next_page:
             next_url = next_page.get('href')
@@ -62,7 +63,7 @@ def get_all_books(url):
         image_url_replace = image_url['src'].replace("../../", "")
         image_url_absolute = (("http://books.toscrape.com/") + (image_url_replace))
         im = Image.open(urllib.request.urlopen(image_url_absolute))
-        im.save(f"{title_book}_image.png")
+        im.save(f"{categ}/{title_book.replace(' ', '_')}_image.png")
 
         with open(f"{categ}_books.csv", "a", encoding="utf-8") as csv_book:
             writer = csv.writer(csv_book)
@@ -83,13 +84,18 @@ def get_all_categories(url):
         url_change_category = category['href'].replace("..", "")
         link_category = (("http://books.toscrape.com/") + (url_change_category))
         print(link_category)
-        with open(f'{category.text.strip()}_books.csv', "w", encoding='utf-8') as csv_book:
-            writer = csv.writer(csv_book)
-            header = ['product_page_url', 'category', 'title', 'product_description', 'upc', 'price_including_tax',
-                    'price_excluding_tax', 'number_available', 'rating', 'review']
 
+        current_directory = os.getcwd()
+        final_directory = os.path.join(current_directory, category.text.strip())
+        if not os.path.exists(final_directory):
+            os.mkdir(final_directory)
+
+        with open(f'{category.text.strip()}_books.csv', "w", encoding='utf-8', newline='') as csv_book:
+            writer = csv.writer(csv_book)
+            headers = ['product_page_url', 'category', 'title', 'product_description', 'upc', 'price_including_tax',
+                    'price_excluding_tax', 'number_available', 'rating', 'review']
+            writer.writerow(headers)
             get_all_books(link_category)
 
 get_all_categories(url)
 
-# array[2]
