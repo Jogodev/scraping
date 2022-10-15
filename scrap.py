@@ -63,7 +63,7 @@ def get_all_books(url):
         image_url_replace = image_url['src'].replace("../../", "")
         image_url_absolute = (("http://books.toscrape.com/") + (image_url_replace))
         im = Image.open(urllib.request.urlopen(image_url_absolute))
-        im.save(f"{categ}/{title_book.replace(' ', '_')}_image.png")
+        im.save(f"{categ}/{title_book}_image.png")
 
         with open(f"{categ}_books.csv", "a", encoding="utf-8") as csv_book:
             writer = csv.writer(csv_book)
