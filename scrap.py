@@ -10,11 +10,13 @@ product_page_url = []
 title = []
 product_description = []
 category = []
-review_rating = []
+review = []
+rating = []
 image_url = []
 table_book = []
 
 url = "http://books.toscrape.com/index.html"
+
 
 def click(urls):
     return requests.get(urls)
@@ -69,14 +71,13 @@ def get_all_books(url):
             writer = csv.writer(csv_book)
             for product_page_url, category, title, product_description, upc, price_including_tax, price_excluding_tax, number_available, rating, review in zip(
                     link_book, categ, title_book, product_description, table_book_upc[0],
-                    table_book_tax_excl[2], table_book_tax_incl[3], table_book_stock[5], str(len(rating)),
+                    table_book_tax_excl[2], table_book_tax_incl[3], table_book_stock[5], rating,
                     review):
                 writer.writerow(
-                    [link_book, categ, title_book, product_description.text, table_book_upc[0].text,
+                    [link_book, categ, title_book, product_description, table_book_upc[0].text,
                     table_book_tax_excl[2].text,
                     table_book_tax_incl[3].text, table_book_stock[5].text, rating, review.text])
     paginate(url)
-
 
 def get_all_categories(url):
     response = requests.get(url)
