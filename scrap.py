@@ -68,7 +68,6 @@ def get_all_books(url, book_writer):
             note = 4
         else:
             note = 5
-        print(note)
         review = book_soup.find('table', class_='table table-striped').findNext('td').findNext('td').findNext(
             'td').findNext('td').findNext('td').findNext('td').findNext('td')
         image_url = book_soup.find('div', class_='item active').find('img')
