@@ -16,8 +16,6 @@ image_url = []
 table_book = []
 
 url = "http://books.toscrape.com/index.html"
-
-
 def click(urls):
     return requests.get(urls)
 
@@ -74,8 +72,8 @@ def get_all_books(url, book_writer):
         image_url_replace = image_url['src'].replace("../../", "")
         image_url_absolute = (("http://books.toscrape.com/") + (image_url_replace))
         im = Image.open(urllib.request.urlopen(image_url_absolute))
-        bad_chars = '/:\"?!*$&'
-        good_chars = "        "
+        bad_chars = "/:\"?!*$'&`"
+        good_chars = "          "
         trantab = link_book.maketrans(bad_chars, good_chars)
         im.save(f"{categ}/{title_book.translate(trantab)[:50]}_image.png")
 
@@ -96,9 +94,9 @@ def get_all_categories(url):
         print(link_category)
         current_directory = os.getcwd()
         final_directory = os.path.join(current_directory, category.text.strip())
+        csv_directory = os.path.join(current_directory, "all_csv")
         if not os.path.exists(final_directory):
             os.mkdir(final_directory)
-
         with open(f'{category.text.strip()}_books.csv', "w", encoding='utf-8', newline='') as csv_book:
             writer = csv.writer(csv_book, delimiter=';')
             headers = ['Product_page_url', 'Category', 'Title', 'Product_description', 'UPC', 'Price_including_tax',
