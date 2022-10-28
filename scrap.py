@@ -99,8 +99,8 @@ def get_all_categories(url):
             os.mkdir(final_directory)
         with open(f'{category.text.strip()}_books.csv', "w", encoding='utf-8', newline='') as csv_book:
             writer = csv.writer(csv_book, delimiter=';')
-            headers = ['Product_page_url', 'Category', 'Title', 'Product_description', 'UPC', 'Price_including_tax',
-                       'Price_excluding_tax', 'Number_available', 'Rating', 'Review']
+            headers = ['Product page url', 'Category', 'Title', 'Product description', 'UPC', 'Price including tax',
+                       'Price excluding tax', 'Number available', 'Rating', 'Review']
             writer.writerow(headers)
             get_all_books(link_category, writer)
 
@@ -108,5 +108,5 @@ def get_all_categories(url):
 def scrap(url):
     get_all_categories(url)
 
-
-scrap(url)
+if __name__ == '__main__':
+    scrap(url)
