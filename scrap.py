@@ -16,12 +16,13 @@ image_url = []
 table_book = []
 
 url = "http://books.toscrape.com/index.html"
+
 def click(urls):
     return requests.get(urls)
 
 
 def paginate(url, book_writer):
-    response = requests.get(url)
+    response = click(url)
     soup = BeautifulSoup(response.content, 'html.parser')
     footer = soup.select_one('li.current')
     try:
@@ -36,7 +37,7 @@ def paginate(url, book_writer):
 
 
 def get_all_books(url, book_writer):
-    response = requests.get(url)
+    response = click(url)
     book_soup = BeautifulSoup(response.content, 'html.parser')
     link_books = book_soup.find('ol', class_='row').findAll('a')
     for books in link_books[1::2]:
@@ -85,7 +86,7 @@ def get_all_books(url, book_writer):
 
 
 def get_all_categories(url):
-    response = requests.get(url)
+    response = click(url)
     category_soup = BeautifulSoup(response.content, 'html.parser')
     categories = category_soup.find('div', class_='side_categories').find('ul').find('ul').findAll('a', href=True)
     for category in categories:
@@ -94,7 +95,6 @@ def get_all_categories(url):
         print(link_category)
         current_directory = os.getcwd()
         final_directory = os.path.join(current_directory, category.text.strip())
-        csv_directory = os.path.join(current_directory, "all_csv")
         if not os.path.exists(final_directory):
             os.mkdir(final_directory)
         with open(f'{category.text.strip()}_books.csv', "w", encoding='utf-8', newline='') as csv_book:
